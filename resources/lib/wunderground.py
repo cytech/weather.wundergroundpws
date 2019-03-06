@@ -9,15 +9,13 @@ from io import BytesIO
 import json
 
 API = sys.modules[ "__main__" ].API
-STATIONID = sys.modules[ "__main__" ].STATIONID
-FORECASTLAT= sys.modules[ "__main__" ].FORECASTLAT
-FORECASTLON= sys.modules[ "__main__" ].FORECASTLON
-FORECAST5_URL = 'https://api.weather.com/v3/wx/forecast/daily/5day?geocode={},{}&units=m&language=en-US&format=json&apiKey={}'.format(FORECASTLAT,FORECASTLON,API)
-CURRENT_PWS_URL = 'https://api.weather.com/v2/pws/observations/current?stationId={}&format=json&units=m&apiKey={}'.format(STATIONID, API)
+FORECAST5_URL = 'https://api.weather.com/v3/wx/forecast/daily/5day?geocode={},{}&units=m&language=en-US&format=json&apiKey={}'
+CURRENT_PWS_URL = 'https://api.weather.com/v2/pws/observations/current?stationId={}&format=json&units=m&apiKey={}'
 
-def wundergroundapi():
+def wundergroundapi(locid, loclat, loclon):
     try:
-        forecast5_req = urllib.request.Request(FORECAST5_URL)
+        forecast5_url = FORECAST5_URL.format(loclat,loclon,API)
+        forecast5_req = urllib.request.Request(forecast5_url)
         forecast5_req.add_header('Accept-encoding', 'gzip')
         response = urllib.request.urlopen(forecast5_req)
         if response.info().get('Content-Encoding') == 'gzip':
@@ -31,7 +29,8 @@ def wundergroundapi():
         forecast5_data = ''
 
     try:
-        currentpws_req = urllib.request.Request(CURRENT_PWS_URL)
+        currentpws_url = CURRENT_PWS_URL.format(locid, API)
+        currentpws_req = urllib.request.Request(currentpws_url)
         currentpws_req.add_header('Accept-encoding', 'gzip')
         response = urllib.request.urlopen(currentpws_req)
         if response.info().get('Content-Encoding') == 'gzip':

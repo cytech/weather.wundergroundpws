@@ -46,13 +46,7 @@ sys.path.append(RESOURCE)
 
 from utilities import *
 from wunderground import wundergroundapi
-#web debug
-#import web_pdb; web_pdb.set_trace()
 
-#WUNDERGROUND_LOC = 'http://autocomplete.wunderground.com/aq?query=%s&format=JSON'
-#https://api.weather.com/v3/location/near?geocode=31.39,-110.04&product=pws&format=json&apiKey=fe7f6f1db7bc46ccbf6f1db7bc96ccf5
-#https://api.weather.com/v3/location/search?query=kazbisbe&locationType=pws&language=en-US&format=json&apiKey=fe7f6f1db7bc46ccbf6f1db7bc96ccf5
-WUNDERGROUND_LOC = 'https://api.weather.com/v3/location/near?geocode=31.39,-110.04&product=pws&format=json&apiKey={}'.format(API)
 FORMAT           = 'json'
 DEBUG            = ADDON.getSetting('Debug')
 XBMC_PYTHON      = xbmcaddon.Addon(id='xbmc.python').getAddonInfo('version')
@@ -77,78 +71,19 @@ def log(txt):
 def set_property(name, value):
     WEATHER_WINDOW.setProperty(name, value)
 
-# def refresh_locations():
-#     locations = 0
-#     for count in range(1, 6):
-#         loc_name = ADDON.getSetting('Location%s' % count)
-#         if loc_name != '':
-#             locations += 1
-#         else:
-#             ADDON.setSetting('Location%sid' % count, '')
-#         set_property('Location%s' % count, loc_name)
-#     set_property('Locations', str(locations))
-#     log('available locations: %s' % str(locations))
+def refresh_locations():
+    locations = 0
+    for count in range(1, 6):
+        loc_name = ADDON.getSetting('Location%s' % count)
+        if loc_name != '':
+            locations += 1
+        else:
+            ADDON.setSetting('Location%sid' % count, '')
+        set_property('Location%s' % count, loc_name)
+    set_property('Locations', str(locations))
+    log('available locations: %s' % str(locations))
 
-def get_data(url):
-    try:
-        req = urllib.request.urlopen(url)
-        response = req.read()
-        req.close()
-    except:
-        response = ''
-    return response
-
-def location(string):
-    locs   = []
-    locids = []
-    log('location: %s' % string)
-    loc = unicodedata.normalize('NFKD', str(string, 'utf-8')).encode('ascii','ignore')
-    log('searching for location: %s' % loc)
-    #url = WUNDERGROUND_LOC % urllib2.parse.quote(loc)
-    url = WUNDERGROUND_LOC
-    query = get_data(url)
-    log('location data: %s' % query)
-    data = parse_data(query)
-    # if data != '' and 'RESULTS' in data:
-    #     for item in data['RESULTS']:
-    #         location   = item['name']
-    #         locationid = item['l'][3:]
-    #         locs.append(location)
-    #         locids.append(locationid)
-    if data != '' and 'location' in data:
-        for item in data['location']:
-            location   = STATIONID + ',' + item['stationName']
-            locationid = ""
-            locs.append(location)
-            locids.append(locationid)
-    #locs.append("KAZBISBE8, PalominasEast, Bisbee, AZ, US")
-    #locids.append("")
-    return locs, locids
-
-# def geoip():
-#     retry = 0
-#     while (retry < 6) and (not xbmc.abortRequested):
-#         query = wundergroundapi('geolookup', 'lang:EN', 'autoip', FORMAT)
-#         if query != '':
-#             retry = 6
-#         else:
-#             retry += 1
-#             xbmc.sleep(10000)
-#             log('geoip download failed')
-#     log('geoip data: %s' % query)
-#     data = parse_data(query)
-#     if data != '' and 'location' in data:
-#         location   = data['location']['city']
-#         locationid = data['location']['l'][3:]
-#         ADDON.setSetting('Location1', location)
-#         ADDON.setSetting('Location1id', locationid)`
-#         log('geoip location: %s' % location)
-#     else:
-#         location = ''
-#         locationid = ''
-#     return location, locationid
-
-def forecast(loc,locid):
+def forecast(loc,locid, loclat, loclon):
     try:
         lang = LANG[LOCALIZE]
     except:
@@ -157,7 +92,7 @@ def forecast(loc,locid):
     log('weather location: %s' % locid)
     retry = 0
     while (retry < 6) and (not xbmc.abortRequested):
-        query = wundergroundapi()
+        query = wundergroundapi(locid, loclat, loclon)
 
         if query != '':
             retry = 6
@@ -204,7 +139,6 @@ def parse_data(response):
 
 def properties(data,loc,locid):
 # standard properties
-    #set_property('Current.Location'      , loc)
     set_property('Current.Location'      , str(data['observations'][0]['stationID']))
     set_property('Current.Temperature'   , str(data['observations'][0]['metric']['temp']))
     set_property('Current.Wind'          , str(data['observations'][0]['metric']['windSpeed']))
@@ -216,12 +150,9 @@ def properties(data,loc,locid):
 
 # forecast properties
     set_property('Forecast.IsFetched'        , 'true')
-    # set_property('Forecast.City'             , data['current_observation']['display_location']['city'])
-    # set_property('Forecast.State'            , data['current_observation']['display_location']['state_name'])
-    # set_property('Forecast.Country'          , data['current_observation']['display_location']['country'])
-    set_property('Forecast.City'             , "KAZBISBE8")
-    set_property('Forecast.State'            , "AZ")
-    set_property('Forecast.Country'          , "US")
+    set_property('Forecast.City'             , "")
+    set_property('Forecast.State'            , "")
+    set_property('Forecast.Country'          , "")
     if data['observations'][0]['epoch']:
         update = time.localtime(float(data['observations'][0]['epoch']))
         local = time.localtime(float(data['observations'][0]['epoch']))
@@ -332,37 +263,22 @@ set_property('WeatherProviderLogo', xbmc.translatePath(os.path.join(CWD, 'resour
 
 if not API:
     log('no api key provided')
-# elif sys.argv[1].startswith('Location'):
-#     keyboard = xbmc.Keyboard('', xbmc.getLocalizedString(14024), False)
-#     keyboard.doModal()
-#     if (keyboard.isConfirmed() and keyboard.getText() != ''):
-#         text = keyboard.getText()
-#         locations, locationids = location(text)
-#         dialog = xbmcgui.Dialog()
-#         if locations != []:
-#             selected = dialog.select(xbmc.getLocalizedString(396), locations)
-#             if selected != -1:
-#                 ADDON.setSetting(sys.argv[1], locations[selected])
-#                 ADDON.setSetting(sys.argv[1] + 'id', locationids[selected])
-#                 log('selected location: %s' % locations[selected])
-#                 log('selected location id: %s' % locationids[selected])
-#         else:
-#             dialog.ok(ADDONNAME, xbmc.getLocalizedString(284))
 else:
     location = ADDON.getSetting('Location%s' % sys.argv[1])
     locationid = ADDON.getSetting('Location%sid' % sys.argv[1])
+    locationlat = ADDON.getSetting('Location%slat' % sys.argv[1])
+    locationlon = ADDON.getSetting('Location%slon' % sys.argv[1])
     if (locationid == '') and (sys.argv[1] != '1'):
         location = ADDON.getSetting('Location1')
         locationid = ADDON.getSetting('Location1id')
+        locationlat = ADDON.getSetting('Location1lat')
+        locationlon = ADDON.getSetting('Location1lon')
         log('trying location 1 instead')
-    # if locationid == '':
-    #     log('fallback to geoip')
-    #     location, locationid = geoip()
     if not locationid == '':
-        forecast(location, locationid)
+        forecast(location, locationid, locationlat, locationlon)
     else:
         log('no location found')
         clear()
-    #refresh_locations()
+    refresh_locations()
 
 log('finished')
