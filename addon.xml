@@ -181,6 +181,6 @@
 		<forum></forum>
 		<website></website>
 		<email></email>
-		<source>https://github.com/cytech/weather.wunderground/</source>
+		<source>https://github.com/cytech/weather.wundergroundpws/</source>
 	</extension>
 </addon>
