@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import sys, math
 import xbmc
 
@@ -83,48 +86,56 @@ LANG = { 'afrikaans'             : 'AF',
          'vietnamese'            : 'VU',
          'welsh'                 : 'CY'}
 
-WEATHER_CODES = { 'chanceflurries'    : '41',
-                  'chancerain'        : '39',
-                  'chancesleet'       : '6',
-                  'chancesnow'        : '41',
-                  'chancetstorms'     : '38',
-                  'clear'             : '32',
-                  'cloudy'            : '26',
-                  'flurries'          : '13',
-                  'fog'               : '20',
-                  'hazy'              : '21',
-                  'mostlycloudy'      : '28',
-                  'mostlysunny'       : '34',
-                  'partlycloudy'      : '30',
-                  'partlysunny'       : '34',
-                  'sleet'             : '18',
-                  'rain'              : '11',
-                  'snow'              : '42',
-                  'sunny'             : '32',
-                  'tstorms'           : '38',
-                  'unknown'           : 'na',
-                  ''                  : 'na',
-                  'nt_chanceflurries' : '46',
-                  'nt_chancerain'     : '45',
-                  'nt_chancesleet'    : '45',
-                  'nt_chancesnow'     : '46',
-                  'nt_chancetstorms'  : '47',
-                  'nt_clear'          : '31',
-                  'nt_cloudy'         : '27',
-                  'nt_flurries'       : '46',
-                  'nt_fog'            : '20',
-                  'nt_hazy'           : '21',
-                  'nt_mostlycloudy'   : '27',
-                  'nt_mostlysunny'    : '33',
-                  'nt_partlycloudy'   : '29',
-                  'nt_partlysunny'    : '33',
-                  'nt_sleet'          : '45',
-                  'nt_rain'           : '45',
-                  'nt_snow'           : '46',
-                  'nt_sunny'          : '31',
-                  'nt_tstorms'        : '47',
-                  'nt_unknown'        : 'na',
-                  'nt_'               : 'na'}
+                # WU    KODI    description
+WEATHER_CODES = {0: '0',  # Tornado	Forecast	Night + Day
+                 1: '1',  # Tropical Storm	Forecast + Observations	Night + Day
+                 2: '2',  # Hurricane	Forecast	Night + Day
+                 3: '3',  # Strong Storms	Forecast	Night + Day
+                 4: '4',  # Thunder and Hail	Forecast + Observations	Night + Day
+                 5: '5',  # Rain to Snow Showers	Forecast + Observations	Night + Day
+                 6: '6',  # Rain / Sleet	Forecast + Observations	Night + Day
+                 7: '7',  # Wintry Mix Snow / Sleet	Forecast + Observations	Night + Day
+                 8: '8',  # Freezing Drizzle	Forecast + Observations	Night + Day
+                 9: '9',  # Drizzle	Forecast + Observations	Night + Day
+                 10: '10',  # Freezing Rain	Forecast + Observations	Night + Day
+                 11: '11',  # Light Rain	Forecast + Observations	Night + Day
+                 12: '12',  # Rain	Forecast + Observations	Night + Day
+                 13: '13',  # Scattered Flurries	Forecast + Observations	Night + Day
+                 14: '14',  # Light Snow	Forecast + Observations	Night + Day
+                 15: '15',  # Blowing / Drifting Snow	Forecast + Observations	Night + Day
+                 16: '16',  # Snow	Forecast + Observations	Night + Day
+                 17: '17',  # Hail	Forecast + Observations	Night + Day
+                 18: '18',  # Sleet	Forecast + Observations	Night + Day
+                 19: '19',  # Blowing Dust / Sandstorm	Forecast + Observations	Night + Day
+                 20: '20',  # Foggy	Forecast + Observations	Night + Day
+                 21: '21',  # Haze / Windy	Forecast + Observations	Night + Day
+                 22: '22',  # Smoke / Windy	Forecast + Observations	Night + Day
+                 23: '23',  # Breezy	Forecast	Night + Day
+                 24: '24',  # Blowing Spray / Windy	Forecast + Observations	Night + Day
+                 25: '25',  # Frigid / Ice Crystals	Forecast + Observations	Night + Day
+                 26: '26',  # Cloudy	Forecast + Observations	Night + Day
+                 27: '27',  # Mostly Cloudy	Forecast + Observations	Night + Day
+                 28: '28',  # Mostly Cloudy	Forecast + Observations	Day
+                 29: '29',  # Partly Cloudy	Forecast + Observations	Night
+                 30: '30',  # Partly Cloudy	Forecast + Observations	Day
+                 31: '31',  # Clear	Forecast + Observations	Night
+                 32: '32',  # Sunny	Forecast + Observations	Day
+                 33: '33',  # Fair / Mostly Clear	Forecast + Observations	Night
+                 34: '34',  # Fair / Mostly Sunny	Forecast + Observations	Day
+                 35: '35',  # Mixed Rain & Hail	Forecast	Day
+                 36: '36',  # Hot	Forecast	Day
+                 37: '37',  # Isolated Thunderstorms	Forecast	Day
+                 38: '38',  # Thunderstorms	Forecast + Observations	Night + Day
+                 39: '39',  # Scattered Showers	Forecast	Day
+                 40: '40',  # Heavy Rain	Forecast + Observations	Night + Day
+                 41: '41',  # Scattered Snow Showers	Forecast	Day
+                 42: '42',  # Heavy Snow	Forecast + Observations	Night + Day
+                 43: '43',  # Blizzard	Forecast	Night + Day
+                 44: 'na',  # Not Available (N/A)	Forecast	Night + Day
+                 45: '45',  # Scattered Showers	Forecast	Night
+                 46: '46',  # Scattered Snow Showers	Forecast	Night
+                 47: '47',  # Scattered Thunderstorms	Forecast + Observations	Night + Day
+                 }
 
 MONTH = { 1  : xbmc.getLocalizedString(51),
           2  : xbmc.getLocalizedString(52),
@@ -209,6 +220,15 @@ def KPHTOBFT(spd):
         bft = ''
     return bft
 
+def CELSIUStoFAHR(temp):
+    if temp is None:
+        return 'na'
+    return 9/5 * temp + 32
+
+def wind_deg_to_card(deg):
+    arr = ['NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']
+    return arr[int(abs((deg - 11.25) % 360) / 22.5)]
+
 def FEELS_LIKE(T, V=0, R=0, ext=''):
     if T <= 10 and V >= 8:
         FeelsLike = WIND_CHILL(T, V)
@@ -236,9 +256,9 @@ def HEAT_INDEX(T, R):
 def DEW_POINT(Tc=0, RH=93, ext='', minRH=( 0, 0.075 )[ 0 ]):
     Es = 6.11 * 10.0**( 7.5 * Tc / ( 237.7 + Tc ) )
     RH = RH or minRH
-    E = ( RH * Es ) / 100
+    E = old_div(( RH * Es ), 100)
     try:
-        DewPoint = ( -430.22 + 237.7 * math.log( E ) ) / ( -math.log( E ) + 19.08 )
+        DewPoint = old_div(( -430.22 + 237.7 * math.log( E ) ), ( -math.log( E ) + 19.08 ))
     except ValueError:
         DewPoint = 0
     if ext == 'F':

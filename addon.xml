@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="weather.wunderground" name="Weather Underground" version="6.0.1" provider-name="ronie">
+<addon id="weather.wundergroundpws" name="Weather UndergroundPWS" version="1.0.0" provider-name="cytech">
 	<requires>
 		<import addon="xbmc.python" version="2.25.0"/>
+		<import addon="script.module.future" version="0.0.1"/>
+        <import addon="script.module.web-pdb" />
 	</requires>
 	<extension point="xbmc.python.weather" library="default.py"/>
 	<extension point="xbmc.addon.metadata">
@@ -177,9 +179,9 @@
 		<language></language>
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE Version 2</license>
-		<forum>http://forum.xbmc.org/showthread.php?tid=116668</forum>
+		<forum></forum>
 		<website></website>
 		<email></email>
-		<source>https://github.com/XBMC-Addons/weather.wunderground/</source>
+		<source>https://github.com/cytech/weather.wunderground/</source>
 	</extension>
 </addon>

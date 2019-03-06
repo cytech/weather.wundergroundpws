@@ -1,24 +1,62 @@
 # -*- coding: utf-8 -*-
 
-import sys, urllib2, gzip, base64
-from StringIO import StringIO
+from future import standard_library
+standard_library.install_aliases()
+import sys, urllib.request, urllib.error, urllib.parse, gzip, base64, traceback
+import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+from io import StringIO
+from io import BytesIO
+import json
 
 API = sys.modules[ "__main__" ].API
-URL = 'http://api.wunderground.com/api/%s/%s/%s/q/%s.%s'
+STATIONID = sys.modules[ "__main__" ].STATIONID
+FORECASTLAT= sys.modules[ "__main__" ].FORECASTLAT
+FORECASTLON= sys.modules[ "__main__" ].FORECASTLON
+FORECAST5_URL = 'https://api.weather.com/v3/wx/forecast/daily/5day?geocode={},{}&units=m&language=en-US&format=json&apiKey={}'.format(FORECASTLAT,FORECASTLON,API)
+CURRENT_PWS_URL = 'https://api.weather.com/v2/pws/observations/current?stationId={}&format=json&units=m&apiKey={}'.format(STATIONID, API)
 
-def wundergroundapi(features, settings, query, fmt):
-    url = URL % (API, features, settings, query, fmt)
+def wundergroundapi():
     try:
-        req = urllib2.Request(url)
-        req.add_header('Accept-encoding', 'gzip')
-        response = urllib2.urlopen(req)
+        forecast5_req = urllib.request.Request(FORECAST5_URL)
+        forecast5_req.add_header('Accept-encoding', 'gzip')
+        response = urllib.request.urlopen(forecast5_req)
         if response.info().get('Content-Encoding') == 'gzip':
-            buf = StringIO(response.read())
+            buf = BytesIO(response.read())
             compr = gzip.GzipFile(fileobj=buf)
-            data = compr.read()
+            forecast5_data = compr.read()
         else:
-            data = response.read()
+            forecast5_data = response.read()
         response.close()
     except:
-        data = ''
+        forecast5_data = ''
+
+    try:
+        currentpws_req = urllib.request.Request(CURRENT_PWS_URL)
+        currentpws_req.add_header('Accept-encoding', 'gzip')
+        response = urllib.request.urlopen(currentpws_req)
+        if response.info().get('Content-Encoding') == 'gzip':
+            buf = BytesIO(response.read())
+            compr = gzip.GzipFile(fileobj=buf)
+            dcurrentpws_ata = compr.read()
+        else:
+            currentpws_data = response.read()
+        response.close()
+    except:
+        currentpws_data = ''
+
+    #this is python 3.5
+    #jsonMerged = {**json.loads(currentpws_data), **json.loads(forecast5_data)}
+
+    a = json.loads(currentpws_data)
+    b = json.loads(forecast5_data)
+    jsonMerged = merge_two_dicts(a, b)
+
+    data = json.dumps(jsonMerged)
+
     return data
+
+def merge_two_dicts(x, y):
+    """Given two dicts, merge them into a new dict as a shallow copy."""
+    z = x.copy()
+    z.update(y)
+    return z
