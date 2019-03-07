@@ -1,8 +1,10 @@
-v1.0.1 (WIP)
-need to correct null values returned from WU api
-after 3:00 pm localtime
-temp fix shows current day in forecast, daypart high as 0 degrees
-and icon as 0 (tornado)
+v1.0.1
+-corrected null values returned from WU api
+from weather company API doc:
+    PLEASE NOTE: The daypart object (all keys[0]) as well as the temperatureMax field OUTSIDE of the daypart object
+    will appear as null in the API after 3:00pm Local Apparent Time.
+-set iconCode on key[0] to nightime code and
+-temperature of null to 'na'
 
 v1.0.0
 Rework old Wunderground addon by Ronie v6.0.1

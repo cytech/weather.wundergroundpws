@@ -130,7 +130,7 @@ def parse_data(response):
     try:
         raw = response.replace('<br>',' ').replace('&auml;','ä') # wu api bugs
         #reply = raw.replace('"-999%"','""').replace('"-9999.00"','""').replace('"-9998"','""').replace('"NA"','""').replace('"--"','""') # wu will change these to null responses in the future
-        reply = raw.replace('null', '0')
+        reply = raw.replace('null', '"na"')
         data = json.loads(reply)
     except:
         log('failed to parse weather data')
@@ -219,9 +219,14 @@ def properties(data,loc,locid):
 # daily properties
     set_property('Daily.IsFetched', 'true')
     for count, item in enumerate(data['dayOfWeek']):
-        # if datetime.datetime.now().strftime("%I:%M %p") > "15:00" and count == 0:
-        #     count = count + 1
-        weathercode = WEATHER_CODES[data['daypart'][0]['iconCode'][2*count]]
+        # PLEASE NOTE: The daypart object (all keys[0]) as well as the temperatureMax field OUTSIDE of the daypart object
+        # will appear as null in the API after 3:00pm Local Apparent Time.
+        # this addon only uses iconCode and temperature in the forecast at this time
+        # so after 3pm set iconCode to the night item and temperature to 'na'
+        if data['daypart'][0]['iconCode'][2 * count] == 'na':
+            weathercode = WEATHER_CODES[data['daypart'][0]['iconCode'][2 * count + 1]]
+        else:
+            weathercode = WEATHER_CODES[data['daypart'][0]['iconCode'][2 * count]]
         set_property('Daily.%i.LongDay' % (count + 1), item)
         set_property('Daily.%i.ShortDay' % (count+1), item)
         date = datetime.datetime.fromtimestamp(data['validTimeUtc'][count])
@@ -245,13 +250,25 @@ def properties(data,loc,locid):
             set_property('Daily.%i.WindDegree'           % (count+1), str(data['daypart'][0]['windDirection'][2*count]))
             set_property('Daily.%i.Humidity'             % (count+1), str(data['daypart'][0]['relativeHumidity'][2*count]) + '%')
         if 'F' in TEMPUNIT:
-            set_property('Daily.%i.HighTemperature'  % (count+1), str(CELSIUStoFAHR(data['daypart'][0]['temperature'][2*count])) + TEMPUNIT)
-            set_property('Daily.%i.LowTemperature'   % (count+1), str(CELSIUStoFAHR(data['daypart'][0]['temperature'][2*count + 1])) + TEMPUNIT)
-            set_property('Daily.%i.Precipitation'    % (count+1), str(data['daypart'][0]['qpf'][2*count]) + ' in')
+            # null after 3 pm
+            if data['daypart'][0]['temperature'][2*count] == 'na':
+                set_property('Daily.%i.HighTemperature' % (count + 1), str('na'))
+                set_property('Daily.%i.LowTemperature' % (count + 1), str(CELSIUStoFAHR(data['daypart'][0]['temperature'][2 * count + 1])) + TEMPUNIT)
+                set_property('Daily.%i.Precipitation' % (count + 1), str(data['daypart'][0]['qpf'][2 * count]) + ' in')
+            else:
+                set_property('Daily.%i.HighTemperature'  % (count+1), str(CELSIUStoFAHR(data['daypart'][0]['temperature'][2*count])) + TEMPUNIT)
+                set_property('Daily.%i.LowTemperature'   % (count+1), str(CELSIUStoFAHR(data['daypart'][0]['temperature'][2*count + 1])) + TEMPUNIT)
+                set_property('Daily.%i.Precipitation'    % (count+1), str(data['daypart'][0]['qpf'][2*count]) + ' in')
         else:
-            set_property('Daily.%i.HighTemperature'  % (count+1), str(data['daypart'][0]['temperature'][2*count]) + TEMPUNIT)
-            set_property('Daily.%i.LowTemperature'   % (count+1), str(data['daypart'][0]['temperature'][2*count + 1]) + TEMPUNIT)
-            set_property('Daily.%i.Precipitation'    % (count+1), str(data['daypart'][0]['qpf'][2*count]) + ' in')
+            # null after 3 pm
+            if data['daypart'][0]['temperature'][2 * count] == 'na':
+                set_property('Daily.%i.HighTemperature' % (count + 1), str('na'))
+                set_property('Daily.%i.LowTemperature' % (count + 1), str(data['daypart'][0]['temperature'][2 * count + 1]) + TEMPUNIT)
+                set_property('Daily.%i.Precipitation' % (count + 1), str(data['daypart'][0]['qpf'][2 * count]) + ' in')
+            else:
+                set_property('Daily.%i.HighTemperature'  % (count+1), str(data['daypart'][0]['temperature'][2*count]) + TEMPUNIT)
+                set_property('Daily.%i.LowTemperature'   % (count+1), str(data['daypart'][0]['temperature'][2*count + 1]) + TEMPUNIT)
+                set_property('Daily.%i.Precipitation'    % (count+1), str(data['daypart'][0]['qpf'][2*count]) + ' in')
 
 log('version %s started: %s' % (VERSION, sys.argv))
 log('lang: %s'    % LOCALIZE)
