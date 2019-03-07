@@ -130,7 +130,7 @@ def parse_data(response):
     try:
         raw = response.replace('<br>',' ').replace('&auml;','ä') # wu api bugs
         #reply = raw.replace('"-999%"','""').replace('"-9999.00"','""').replace('"-9998"','""').replace('"NA"','""').replace('"--"','""') # wu will change these to null responses in the future
-        reply = raw.replace('"null"', '""')
+        reply = raw.replace('null', '0')
         data = json.loads(reply)
     except:
         log('failed to parse weather data')
@@ -219,6 +219,8 @@ def properties(data,loc,locid):
 # daily properties
     set_property('Daily.IsFetched', 'true')
     for count, item in enumerate(data['dayOfWeek']):
+        # if datetime.datetime.now().strftime("%I:%M %p") > "15:00" and count == 0:
+        #     count = count + 1
         weathercode = WEATHER_CODES[data['daypart'][0]['iconCode'][2*count]]
         set_property('Daily.%i.LongDay' % (count + 1), item)
         set_property('Daily.%i.ShortDay' % (count+1), item)
