@@ -2,6 +2,8 @@ weather.wundergroundpws
 
 A Kodi weather addon for registered and active Weather Underground personal weather station users.
 
+:+1: If you find this product useful, feel free to buy me a beer: https://paypal.me/cytecheng
+
 To use this addon, you need to enter your personal weather station API key in the addon settings.
 
 To get a free API key:
