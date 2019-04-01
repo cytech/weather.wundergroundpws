@@ -264,3 +264,17 @@ def DEW_POINT(Tc=0, RH=93, ext='', minRH=( 0, 0.075 )[ 0 ]):
     if ext == 'F':
         DewPoint = DewPoint * 1.8 + 32
     return str(int(round(DewPoint)))
+
+
+def MBtoINHG(pressure):
+    if pressure is None:
+        return 'na'
+    pressure = pressure * 0.02953
+    return str(round(pressure, 2))
+
+
+def MMtoIN(precip):
+    if precip is None:
+        return 'na'
+    precip = precip * 0.0393701
+    return str(round(precip, 2))

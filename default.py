@@ -16,6 +16,25 @@
 # *  http://www.gnu.org/copyleft/gpl.html
 
 
+# Kodi expects a weather addon to return these properties:
+#
+# * Current.Condition (the weather forecast)
+# * Current.Temperature (temperature in degrees celcius)
+# * Current.Wind (windspeed in km/h)
+# * Current.WindDirection (wind direction, NNE)
+# * Current.Humidity (humidity in %)
+# * Current.FeelsLike (feels-like temperature in degrees celcius)
+# * Current.UVIndex (the uv-index)
+# * Current.DewPoint (dewpoint in degrees celcius)
+# * Current.OutlookIcon (weather icon, 34.png)
+# * Current.FanartCode (condition code, 34)
+# * Day%i.Title (name of the day)
+# * Day%i.HighTemp (high temp of the day in degrees celcius)
+# * Day%i.LowTemp (low temp of the day in degrees celcius)
+# * Day%i.Outlook (the weather forecast)
+# * Day%i.OutlookIcon (weather icon, 18.png)
+# * Day%i.FanartCode (condition code, 18)
+
 from __future__ import division
 from future import standard_library
 standard_library.install_aliases()
@@ -179,13 +198,13 @@ def properties(data,loc,locid):
     set_property('Current.WindDegree'        , str(data['observations'][0]['winddir']) + u'°')
     set_property('Current.SolarRadiation'    , str(data['observations'][0]['uv']))
     if 'F' in TEMPUNIT:
-        set_property('Current.Pressure'      , str(data['observations'][0]['metric']['pressure']) + ' inHg')
-        set_property('Current.Precipitation' , str(data['observations'][0]['metric']['precipRate']) + ' in')
-        set_property('Current.HeatIndex'     , str(data['observations'][0]['metric']['heatIndex']) + TEMPUNIT)
-        set_property('Current.WindChill'     , str(data['observations'][0]['metric']['windChill']) + TEMPUNIT)
+        set_property('Current.Pressure'      , str(MBtoINHG(data['observations'][0]['metric']['pressure'])) + ' inHg')
+        set_property('Current.Precipitation' , str(MMtoIN(data['observations'][0]['metric']['precipRate'])) + ' in/hr')
+        set_property('Current.HeatIndex'     , str(CELSIUStoFAHR(data['observations'][0]['metric']['heatIndex'])) + TEMPUNIT)
+        set_property('Current.WindChill'     , str(CELSIUStoFAHR(data['observations'][0]['metric']['windChill'])) + TEMPUNIT)
     else:
         set_property('Current.Pressure'      , str(data['observations'][0]['metric']['pressure']) + ' mb')
-        set_property('Current.Precipitation' , str(data['observations'][0]['metric']['precipRate']) + ' mm')
+        set_property('Current.Precipitation' , str(data['observations'][0]['metric']['precipRate']) + ' mm/hr')
         set_property('Current.HeatIndex'     , str(data['observations'][0]['metric']['heatIndex']) + TEMPUNIT)
         set_property('Current.WindChill'     , str(data['observations'][0]['metric']['windChill']) + TEMPUNIT)
     if SPEEDUNIT == 'mph':
