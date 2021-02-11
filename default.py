@@ -161,8 +161,8 @@ def properties(data,loc,locid):
     set_property('Current.Location'      , str(data['observations'][0]['stationID']))
     set_property('Current.Temperature'   , str(data['observations'][0]['metric']['temp']))
     set_property('Current.Wind'          , str(data['observations'][0]['metric']['windSpeed']))
-    set_property('Current.WindDirection' , str(wind_deg_to_card(data['observations'][0]['winddir'])))
-    set_property('Current.Humidity'      , str(data['observations'][0]['humidity']))
+    set_property('Current.WindDirection' , str(wind_deg_to_card(data['observations'][0]['winddir']) or 0))
+    set_property('Current.Humidity'      , str(data['observations'][0]['humidity']) or 0)
     set_property('Current.FeelsLike' , FEELS_LIKE(int(data['observations'][0]['metric']['temp']), data['observations'][0]['metric']['windSpeed'], data['observations'][0]['humidity'], 'c') + TEMPUNIT)
     set_property('Current.UVIndex'       , str(data['observations'][0]['uv']))
     set_property('Current.DewPoint'      , str(data['observations'][0]['metric']['dewpt']))
@@ -264,10 +264,10 @@ def properties(data,loc,locid):
             set_property('Daily.%i.WindSpeed'        % (count+1), KPHTOBFT(data['daypart'][0]['windSpeed'][2*count]))
         else:
             set_property('Daily.%i.WindSpeed'        % (count+1), str(data['daypart'][0]['windSpeed'][2*count]) + ' ' + SPEEDUNIT)
-            set_property('Daily.%i.WindDirection'        % (count+1), str(data['daypart'][0]['windDirection'][2*count]))
-            set_property('Daily.%i.ShortWindDirection'   % (count+1), str(data['daypart'][0]['windDirectionCardinal'][2*count]))
-            set_property('Daily.%i.WindDegree'           % (count+1), str(data['daypart'][0]['windDirection'][2*count]))
-            set_property('Daily.%i.Humidity'             % (count+1), str(data['daypart'][0]['relativeHumidity'][2*count]) + '%')
+            set_property('Daily.%i.WindDirection'        % (count+1), str(data['daypart'][0]['windDirection'][2*count] or 0))
+            set_property('Daily.%i.ShortWindDirection'   % (count+1), str(data['daypart'][0]['windDirectionCardinal'][2*count] or 0))
+            set_property('Daily.%i.WindDegree'           % (count+1), str(data['daypart'][0]['windDirection'][2*count] or 0))
+            set_property('Daily.%i.Humidity'             % (count+1), str(data['daypart'][0]['relativeHumidity'][2*count] or 0) + '%')
         if 'F' in TEMPUNIT:
             # null after 3 pm
             if data['daypart'][0]['temperature'][2*count] == 'na':
