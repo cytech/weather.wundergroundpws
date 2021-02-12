@@ -226,8 +226,11 @@ def CELSIUStoFAHR(temp):
     return 9/5 * temp + 32
 
 def wind_deg_to_card(deg):
-    arr = ['NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']
-    return arr[int(abs((deg - 11.25) % 360) / 22.5)]
+    if deg == "na":
+        return 'na'
+    else:
+        arr = ['NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']
+        return arr[int(abs((deg - 11.25) % 360) / 22.5)]
 
 def FEELS_LIKE(T, V=0, R=0, ext=''):
     if T <= 10 and V >= 8:
