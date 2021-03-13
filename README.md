@@ -5,7 +5,7 @@ weather.wundergroundpws
 This addon will not work with Kodi 19.  
 I have forked the Kodi 19 Multi Weather addon by Ronie (available in the default Kodi 19 Weather Repo) and it could use some testing.  
 The Multi Weather addon allows for multiple providers (currently Yahoo, Weatherbit and openweathermaps) so I have added a wundergroundpws provider.  
-Get it here https://gitlab.com/dalbright/weather.multi      (develop branch)  
+Get it here https://github.com/cytech/weather.multi     (develop branch)  
 Also added a provider for those of you using an Ambient Weather station and uploading to AmbientWeather.net
 
 A Kodi weather addon for registered and active Weather Underground personal weather station users.
